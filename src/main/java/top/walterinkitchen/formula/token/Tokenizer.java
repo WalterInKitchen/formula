@@ -95,7 +95,36 @@ public class Tokenizer {
          * identifier token
          */
         IDENTIFIER(10) {
+            boolean isIdentifierStartByte(byte bt) {
+                return (bt >= 'a' && bt <= 'z') || (bt >= 'A' && bt <= 'Z');
+            }
 
+            boolean isIdentifierBodyByte(byte bt) {
+                if (isIdentifierStartByte(bt)) {
+                    return true;
+                }
+                if (bt >= '0' && bt <= '9') {
+                    return true;
+                }
+                return bt == '_';
+            }
+
+            @Override
+            boolean isByteStartOfToken(byte[] bytes, int position) {
+                byte bt = bytes[position];
+                return isIdentifierStartByte(bt);
+            }
+
+            @Override
+            TokenRes parseToken(byte[] bytes, int position) {
+                int index = position;
+                StringBuilder builder = new StringBuilder();
+                while (index < bytes.length && isIdentifierBodyByte(bytes[index])) {
+                    builder.append((char) bytes[index++]);
+                }
+                IdentifierToken token = IdentifierToken.builder().setIdentifier(builder.toString()).build();
+                return TokenRes.builder().token(token).size(builder.length()).build();
+            }
         },
         /**
          * decimal token

@@ -1,6 +1,7 @@
 package top.walterinkitchen.formula.token;
 
 import lombok.Builder;
+import lombok.Getter;
 
 /**
  * The identifier token
@@ -9,6 +10,7 @@ import lombok.Builder;
  * @date 2022/3/7
  **/
 public class IdentifierToken implements Token {
+    @Getter
     private final String identifier;
 
     @Builder(setterPrefix = "set", toBuilder = true)

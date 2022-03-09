@@ -9,7 +9,9 @@ import org.junit.Test;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * TokenizerTest
@@ -92,12 +94,72 @@ public class TokenizerTest {
      **/
     @Test
     public void test_parseToken_given_decimals_then_returnCorrectToken() {
-        String str = " 120.210 ";
-        byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
-        Tokenizer.TokenRes tokenRes = Tokenizer.TokenParser.DECIMAL.parseToken(bytes, 1);
-        Assert.assertEquals(7, tokenRes.getSize());
-        Assert.assertTrue(tokenRes.getToken() instanceof DecimalToken);
-        DecimalToken token = (DecimalToken) tokenRes.getToken();
-        Assert.assertEquals(0, token.getDecimal().compareTo(new BigDecimal("120.210")));
+        Map<String, TokenCase> cases = new HashMap<String, TokenCase>() {{
+            put("0", new TokenCase(1, "0"));
+            put("1.", new TokenCase(1, "1"));
+            put("1.0", new TokenCase(3, "1"));
+            put("12.50", new TokenCase(5, "12.5"));
+            put("012.5708", new TokenCase(8, "12.5708"));
+        }};
+        for (Map.Entry<String, TokenCase> entry : cases.entrySet()) {
+            String key = entry.getKey();
+            TokenCase value = entry.getValue();
+            Tokenizer.TokenRes tokenRes = Tokenizer.TokenParser.DECIMAL.parseToken(key.getBytes(StandardCharsets.UTF_8), 0);
+            Assert.assertEquals(value.size, tokenRes.getSize());
+            Assert.assertTrue(tokenRes.getToken() instanceof DecimalToken);
+            DecimalToken token = (DecimalToken) tokenRes.getToken();
+            Assert.assertEquals(0, token.getDecimal().compareTo(new BigDecimal(value.expected)));
+        }
+    }
+
+    /**
+     * @given identifier token parser
+     * @expected return true if byte is token start
+     **/
+    @Test
+    public void test_isByteStartOfToken_given_identifierTokenParser_then_returnTrueIfTokenStart() {
+        String expr = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        byte[] bytes = expr.getBytes(StandardCharsets.UTF_8);
+        for (int i = 0; i < bytes.length; i++) {
+            Assert.assertTrue(Tokenizer.TokenParser.IDENTIFIER.isByteStartOfToken(bytes, i));
+        }
+        expr = "0123456789_*=-/`\\+";
+        bytes = expr.getBytes(StandardCharsets.UTF_8);
+        for (int i = 0; i < bytes.length; i++) {
+            Assert.assertFalse(Tokenizer.TokenParser.IDENTIFIER.isByteStartOfToken(bytes, i));
+        }
+    }
+
+    /**
+     * @given identifier token parser
+     * @expected return identifier token
+     **/
+    @Test
+    public void test_parseToken_given_validTokenString_then_returnToken() {
+        Map<String, TokenCase> cases = new HashMap<String, TokenCase>() {{
+            put("abc", new TokenCase(3, "abc"));
+            put("a0", new TokenCase(2, "a0"));
+            put("A1", new TokenCase(2, "A1"));
+            put("Aa_", new TokenCase(3, "Aa_"));
+        }};
+        for (Map.Entry<String, TokenCase> entry : cases.entrySet()) {
+            String key = entry.getKey();
+            TokenCase expected = entry.getValue();
+            Tokenizer.TokenRes tokenRes = Tokenizer.TokenParser.IDENTIFIER.parseToken(key.getBytes(StandardCharsets.UTF_8), 0);
+            Assert.assertTrue(tokenRes.getToken() instanceof IdentifierToken);
+            Assert.assertEquals(expected.size, tokenRes.getSize());
+            IdentifierToken token = (IdentifierToken) tokenRes.getToken();
+            Assert.assertEquals(expected.expected, token.getIdentifier());
+        }
+    }
+
+    private static class TokenCase {
+        private final int size;
+        private final String expected;
+
+        private TokenCase(int size, String expected) {
+            this.size = size;
+            this.expected = expected;
+        }
     }
 }
