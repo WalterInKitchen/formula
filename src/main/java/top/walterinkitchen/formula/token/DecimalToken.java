@@ -1,6 +1,7 @@
 package top.walterinkitchen.formula.token;
 
 import lombok.Builder;
+import lombok.Getter;
 import top.walterinkitchen.formula.util.DecimalFormatter;
 
 import java.math.BigDecimal;
@@ -12,6 +13,7 @@ import java.math.BigDecimal;
  * @date 2022/3/7
  **/
 public class DecimalToken implements Token {
+    @Getter
     private final BigDecimal decimal;
 
     @Builder(setterPrefix = "set", toBuilder = true)

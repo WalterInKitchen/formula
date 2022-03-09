@@ -1,9 +1,11 @@
 package top.walterinkitchen.formula.token;
 
 import lombok.Builder;
+import lombok.Getter;
 import top.walterinkitchen.formula.exception.FormulaException;
 
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
@@ -44,7 +46,7 @@ public class Tokenizer {
         while (position < formulaBytes.length) {
             TokenParser parser = findTokenParser();
             TokenRes tokenRes = parser.parseToken(this.formulaBytes, this.position);
-            if (tokenRes == null) {
+            if (tokenRes == null || tokenRes.token == null) {
                 continue;
             }
             this.position += tokenRes.size;
@@ -67,7 +69,9 @@ public class Tokenizer {
      * the token
      */
     protected static class TokenRes {
+        @Getter
         private final Token token;
+        @Getter
         private final int size;
 
         @Builder
@@ -81,9 +85,78 @@ public class Tokenizer {
      * the token parser
      */
     protected enum TokenParser {
-        DECIMAL;
+        /**
+         * function token
+         */
+        FUNCTION(5) {
 
-        private int priority;
+        },
+        /**
+         * identifier token
+         */
+        IDENTIFIER(10) {
+
+        },
+        /**
+         * decimal token
+         */
+        DECIMAL(1) {
+            @Override
+            boolean isByteStartOfToken(byte[] bytes, int position) {
+                byte bt = bytes[position];
+                return bt >= '0' && bt <= '9';
+            }
+
+            @Override
+            TokenRes parseToken(byte[] bytes, int position) {
+                int index = position;
+                StringBuilder builder = new StringBuilder();
+                int size = 0;
+
+                while (index < bytes.length && bytes[index] >= '0' && bytes[index] <= '9') {
+                    byte bt = bytes[index++];
+                    builder.append((char) bt);
+                    size++;
+                }
+                if (index < bytes.length - 1) {
+                    if (bytes[index] == '.' && bytes[index + 1] >= '0' && bytes[index + 1] <= '9') {
+                        builder.append(".");
+                        size++;
+                        index++;
+                        while (index < bytes.length && bytes[index] >= '0' && bytes[index] <= '9') {
+                            byte bt = bytes[index++];
+                            builder.append((char) bt);
+                            size++;
+                        }
+                    }
+                }
+
+                BigDecimal decimal = new BigDecimal(builder.toString());
+                DecimalToken token = DecimalToken.builder().setDecimal(decimal).build();
+                return TokenRes.builder().token(token).size(size).build();
+            }
+        },
+        /**
+         * white space token
+         */
+        WHITE_SPACE(0) {
+            @Override
+            boolean isByteStartOfToken(byte[] bytes, int position) {
+                byte bt = bytes[position];
+                return bt == ' ' || bt == '\n' || bt == '\t' || bt == '\r';
+            }
+
+            @Override
+            TokenRes parseToken(byte[] bytes, int position) {
+                return TokenRes.builder().size(1).build();
+            }
+        };
+
+        private final int priority;
+
+        TokenParser(int priority) {
+            this.priority = priority;
+        }
 
         /**
          * if byte is this token's start
@@ -95,7 +168,7 @@ public class Tokenizer {
         }
 
         TokenRes parseToken(final byte[] bytes, int position) {
-            return null;
+            return TokenRes.builder().build();
         }
     }
 }
