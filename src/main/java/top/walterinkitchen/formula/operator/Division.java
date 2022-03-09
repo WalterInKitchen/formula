@@ -9,6 +9,6 @@ package top.walterinkitchen.formula.operator;
 public class Division implements Operator {
     @Override
     public String toText() {
-        return "-";
+        return "/";
     }
 }

@@ -3,6 +3,8 @@ package top.walterinkitchen.formula.token;
 import lombok.Builder;
 import lombok.Getter;
 import top.walterinkitchen.formula.exception.FormulaException;
+import top.walterinkitchen.formula.operator.Operator;
+import top.walterinkitchen.formula.operator.OperatorFactory;
 
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
@@ -90,6 +92,25 @@ public class Tokenizer {
          */
         FUNCTION(5) {
 
+        },
+        /**
+         * Operator token
+         */
+        OPERATOR(9) {
+            @Override
+            boolean isByteStartOfToken(byte[] bytes, int position) {
+                byte bt = bytes[position];
+                return bt == '+' || bt == '-' || bt == '*' || bt == '/';
+            }
+
+            @Override
+            TokenRes parseToken(byte[] bytes, int position) {
+                byte bt = bytes[position];
+                String symbol = new String(new byte[]{bt});
+                Operator operator = OperatorFactory.buildOperator(symbol);
+                OperatorToken token = OperatorToken.builder().setOperator(operator).build();
+                return TokenRes.builder().token(token).size(1).build();
+            }
         },
         /**
          * parenthesis token

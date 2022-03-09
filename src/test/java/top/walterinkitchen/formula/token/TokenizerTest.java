@@ -188,6 +188,44 @@ public class TokenizerTest {
         }
     }
 
+    /**
+     * @given operator token parser
+     * @expected return true if byte is start of operator
+     **/
+    @Test
+    public void test_isByteStartOfToken_given_operatorTokenParser_then_returnTrueIfIsOperator() {
+        String expr = "+-*/";
+        byte[] bytes = expr.getBytes(StandardCharsets.UTF_8);
+        for (int i = 0; i < bytes.length; i++) {
+            Assert.assertTrue(Tokenizer.TokenParser.OPERATOR.isByteStartOfToken(bytes, i));
+        }
+        Assert.assertFalse(Tokenizer.TokenParser.OPERATOR.isByteStartOfToken(new byte[]{' '}, 0));
+        Assert.assertFalse(Tokenizer.TokenParser.OPERATOR.isByteStartOfToken(new byte[]{'\\'}, 0));
+    }
+
+    /**
+     * @given operator token parser
+     * @expected return the operator token
+     **/
+    @Test
+    public void test_parseToken_given_operatorParser_then_returnOperator() {
+        Map<String, TokenCase> cases = new HashMap<String, TokenCase>() {{
+            put("+1", new TokenCase(1, "+"));
+            put("-1", new TokenCase(1, "-"));
+            put("*1", new TokenCase(1, "*"));
+            put("/1", new TokenCase(1, "/"));
+        }};
+        for (Map.Entry<String, TokenCase> entry : cases.entrySet()) {
+            String key = entry.getKey();
+            TokenCase expected = entry.getValue();
+            Tokenizer.TokenRes tokenRes = Tokenizer.TokenParser.OPERATOR.parseToken(key.getBytes(StandardCharsets.UTF_8), 0);
+            Assert.assertTrue(tokenRes.getToken() instanceof OperatorToken);
+            Assert.assertEquals(expected.size, tokenRes.getSize());
+            OperatorToken token = (OperatorToken) tokenRes.getToken();
+            Assert.assertEquals(expected.expected, token.toText());
+        }
+    }
+
     private static class TokenCase {
         private final int size;
         private final String expected;
