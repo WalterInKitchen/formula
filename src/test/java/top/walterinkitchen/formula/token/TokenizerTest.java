@@ -153,6 +153,41 @@ public class TokenizerTest {
         }
     }
 
+    /**
+     * @given parenthesis token parser
+     * @expected return true if bytes start with parenthesis
+     **/
+    @Test
+    public void test_isByteStartOfToken_given_parenthesis_then_returnTrueIfParenthesis() {
+        String expr = "()((()))";
+        byte[] bytes = expr.getBytes(StandardCharsets.UTF_8);
+        for (int i = 0; i < bytes.length; i++) {
+            Assert.assertTrue(Tokenizer.TokenParser.PARENTHESIS.isByteStartOfToken(bytes, i));
+        }
+        Assert.assertFalse(Tokenizer.TokenParser.PARENTHESIS.isByteStartOfToken(new byte[]{' '}, 0));
+    }
+
+    /**
+     * @given parenthesis token parser
+     * @expected return parsed token
+     **/
+    @Test
+    public void test_parseToken_given_parenthesisToken_then_returnTheCorrectToken() {
+        Map<String, TokenCase> cases = new HashMap<String, TokenCase>() {{
+            put("(a+b)", new TokenCase(1, "("));
+            put(")*3", new TokenCase(1, ")"));
+        }};
+        for (Map.Entry<String, TokenCase> entry : cases.entrySet()) {
+            String key = entry.getKey();
+            TokenCase expected = entry.getValue();
+            Tokenizer.TokenRes tokenRes = Tokenizer.TokenParser.PARENTHESIS.parseToken(key.getBytes(StandardCharsets.UTF_8), 0);
+            Assert.assertTrue(tokenRes.getToken() instanceof ParenthesisToken);
+            Assert.assertEquals(expected.size, tokenRes.getSize());
+            ParenthesisToken token = (ParenthesisToken) tokenRes.getToken();
+            Assert.assertEquals(expected.expected, token.toText());
+        }
+    }
+
     private static class TokenCase {
         private final int size;
         private final String expected;

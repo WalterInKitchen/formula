@@ -92,6 +92,28 @@ public class Tokenizer {
 
         },
         /**
+         * parenthesis token
+         */
+        PARENTHESIS(7) {
+            @Override
+            boolean isByteStartOfToken(byte[] bytes, int position) {
+                byte bt = bytes[position];
+                return bt == '(' || bt == ')';
+            }
+
+            @Override
+            TokenRes parseToken(byte[] bytes, int position) {
+                byte bt = bytes[position];
+                ParenthesisToken token;
+                if (bt == '(') {
+                    token = ParenthesisToken.buildOpen();
+                } else {
+                    token = ParenthesisToken.buildClose();
+                }
+                return TokenRes.builder().token(token).size(1).build();
+            }
+        },
+        /**
          * identifier token
          */
         IDENTIFIER(10) {
