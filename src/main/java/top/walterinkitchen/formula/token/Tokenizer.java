@@ -6,11 +6,14 @@ import top.walterinkitchen.formula.exception.FormulaException;
 import top.walterinkitchen.formula.operator.Operator;
 import top.walterinkitchen.formula.operator.OperatorFactory;
 
-import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * the tokenizer
@@ -19,21 +22,18 @@ import java.util.List;
  * @date 2022/3/8
  **/
 public class Tokenizer {
-    private final byte[] formulaBytes;
-    private int position;
+    private static final List<TokenParser> PARSERS = Arrays.stream(TokenParser.values()).sorted(Comparator.comparingInt(ps -> ps.priority)).collect(Collectors.toList());
 
-    private Tokenizer(String formula) {
-        this.formulaBytes = formula.getBytes(StandardCharsets.UTF_8);
+    private Tokenizer() {
     }
 
     /**
      * build instance
      *
-     * @param formula formula
      * @return the instance
      */
-    public static Tokenizer build(@NotNull String formula) {
-        return new Tokenizer(formula);
+    public static Tokenizer build() {
+        return new Tokenizer();
     }
 
     /**
@@ -42,16 +42,21 @@ public class Tokenizer {
      * @return tokens
      * @throws FormulaException throw exception while error occurred
      */
-    public List<Token> parseFormula() throws FormulaException {
-        this.position = 0;
+    public List<Token> parseFormula(String formula) throws FormulaException {
+        byte[] formulaBytes = formula.getBytes(StandardCharsets.UTF_8);
+        return parseFormula(formulaBytes);
+    }
+
+    private List<Token> parseFormula(byte[] formulaBytes) throws FormulaException {
+        int position = 0;
         List<Token> tokens = new LinkedList<>();
         while (position < formulaBytes.length) {
-            TokenParser parser = findTokenParser();
-            TokenRes tokenRes = parser.parseToken(this.formulaBytes, this.position);
-            if (tokenRes == null || tokenRes.token == null) {
+            TokenParser parser = findTokenParser(formulaBytes, position);
+            TokenRes tokenRes = parser.parseToken(formulaBytes, position);
+            position += tokenRes.size;
+            if (tokenRes.token == null) {
                 continue;
             }
-            this.position += tokenRes.size;
             tokens.add(tokenRes.token);
         }
         return tokens;
@@ -61,10 +66,18 @@ public class Tokenizer {
      * find token parser
      * if token can not be parsed, throw exception
      *
+     * @param formulaBytes bytes
+     * @param position     position
      * @return parser;never null
      */
-    protected TokenParser findTokenParser() {
-        return null;
+    protected TokenParser findTokenParser(byte[] formulaBytes, int position) {
+        for (TokenParser parser : PARSERS) {
+            if (parser.isByteStartOfToken(formulaBytes, position)) {
+                return parser;
+            }
+        }
+        byte[] bytes = Arrays.copyOfRange(formulaBytes, position, formulaBytes.length);
+        throw new FormulaException("unknown token type:" + new String(bytes));
     }
 
     /**
@@ -83,6 +96,10 @@ public class Tokenizer {
         }
     }
 
+    private static boolean isByteAlphabet(byte bt) {
+        return (bt >= 'a' && bt <= 'z') || (bt >= 'A' && bt <= 'Z');
+    }
+
     /**
      * the token parser
      */
@@ -91,7 +108,61 @@ public class Tokenizer {
          * function token
          */
         FUNCTION(5) {
+            @Override
+            boolean isByteStartOfToken(byte[] bytes, int position) {
+                final int length = bytes.length;
+                if (!isByteAlphabet(bytes[position])) {
+                    return false;
+                }
+                int index = position;
+                while (true) {
+                    if (index >= length || !isByteFunctionNameBody(bytes[index]) || bytes[index++] == '(') {
+                        break;
+                    }
+                }
+                if (index >= length) {
+                    return false;
+                }
+                while (true) {
+                    if (index >= length || bytes[index++] == ')') {
+                        break;
+                    }
+                }
+                return index < length || bytes[index - 1] == ')';
+            }
 
+            @Override
+            TokenRes parseToken(byte[] bytes, int start) {
+                StringBuilder nameBuilder = new StringBuilder();
+                final int length = bytes.length;
+                int index = start;
+                while (index < length && isByteFunctionNameBody(bytes[index])) {
+                    nameBuilder.append((char) bytes[index++]);
+                }
+                int argStart = index + 1;
+                int argEnd = index + 1;
+                while (bytes[++index] != ')') {
+                    argEnd++;
+                }
+
+                FunctionToken token = FunctionToken.builder().setName(nameBuilder.toString()).setArgs(buildArgs(bytes, argStart, argEnd)).build();
+                return TokenRes.builder().token(token).size(index - start + 1).build();
+            }
+
+            private List<Token> buildArgs(byte[] bytes, int start, int end) {
+                if (end <= start) {
+                    return Collections.emptyList();
+                }
+                byte[] subBytes = Arrays.copyOfRange(bytes, start, end);
+                return new Tokenizer().parseFormula(subBytes);
+            }
+
+            private boolean isByteFunctionNameBody(byte bt) {
+                if (isByteAlphabet(bt)) {
+                    return true;
+                }
+                return bt == '_';
+            }
         },
         /**
          * Operator token
@@ -138,12 +209,8 @@ public class Tokenizer {
          * identifier token
          */
         IDENTIFIER(10) {
-            boolean isIdentifierStartByte(byte bt) {
-                return (bt >= 'a' && bt <= 'z') || (bt >= 'A' && bt <= 'Z');
-            }
-
             boolean isIdentifierBodyByte(byte bt) {
-                if (isIdentifierStartByte(bt)) {
+                if (isByteAlphabet(bt)) {
                     return true;
                 }
                 if (bt >= '0' && bt <= '9') {
@@ -155,7 +222,7 @@ public class Tokenizer {
             @Override
             boolean isByteStartOfToken(byte[] bytes, int position) {
                 byte bt = bytes[position];
-                return isIdentifierStartByte(bt);
+                return isByteAlphabet(bt);
             }
 
             @Override

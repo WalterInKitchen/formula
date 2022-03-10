@@ -1,17 +1,15 @@
 package top.walterinkitchen.formula.token;
 
-import mockit.Expectations;
-import mockit.Injectable;
-import mockit.Mocked;
-import mockit.Tested;
 import org.junit.Assert;
 import org.junit.Test;
+import top.walterinkitchen.formula.exception.FormulaException;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * TokenizerTest
@@ -20,30 +18,27 @@ import java.util.Map;
  * @date 2022/3/8
  **/
 public class TokenizerTest {
-    @Tested
-    @Mocked
-    private Tokenizer tokenizer;
-
-    @Injectable
-    private String formula;
-
     /**
-     * @given tokenizer
-     * @expected iterate to parse token
+     * @given expr
+     * @expected tokens
      **/
     @Test
-    public void test_parseFormula_given_tokenizer_then_iterateToParseToken(@Mocked Tokenizer.TokenParser tokenParser, @Mocked Token token) {
-        Tokenizer tokenizer = Tokenizer.build("a+b*c");
-        Tokenizer.TokenRes tokenRes = Tokenizer.TokenRes.builder().size(1).token(token).build();
-        new Expectations() {{
-            tokenizer.findTokenParser();
-            result = tokenParser;
-            tokenParser.parseToken((byte[]) any, anyInt);
-            result = tokenRes;
+    public void test_parseFormula_given_expressions_then_returnTokens() {
+        Map<String, String> cases = new HashMap<String, String>() {{
+            put("a+b", "a+b");
+            put(" a - b ", "a-b");
+            put(" a * b ", "a*b");
+            put(" a / 1 ", "a/1.00");
+            put("abc(a+ 2)", "abc(a+2.00)");
+            put("abc(1+ 2)/3", "abc(1.00+2.00)/3.00");
+            put("1 * 22 + abc(1+ 2)/3", "1.00*22.00+abc(1.00+2.00)/3.00");
         }};
-        List<Token> res = tokenizer.parseFormula();
-        Assert.assertEquals(5, res.size());
-        Assert.assertEquals(token, res.get(0));
+        Tokenizer tokenizer = Tokenizer.build();
+        for (Map.Entry<String, String> entry : cases.entrySet()) {
+            List<Token> tokens = tokenizer.parseFormula(entry.getKey());
+            String res = tokens.stream().map(Token::toText).collect(Collectors.joining());
+            Assert.assertEquals(entry.getValue(), res);
+        }
     }
 
     /**
@@ -223,6 +218,91 @@ public class TokenizerTest {
             Assert.assertEquals(expected.size, tokenRes.getSize());
             OperatorToken token = (OperatorToken) tokenRes.getToken();
             Assert.assertEquals(expected.expected, token.toText());
+        }
+    }
+
+    /**
+     * @given function parser and function string
+     * @expected return true
+     **/
+    @Test
+    public void test_isByteStartOfToken_given_functionParser_then_returnTrueIfFunctionStart() {
+        Map<String, Boolean> cases = new HashMap<String, Boolean>() {{
+            put("abc(a+b)+c", true);
+            put("xyz(a)", true);
+            put("xyz()", true);
+            put("x_a() ", true);
+            put("xyz( ", false);
+            put("xyz(a", false);
+            put("xyz", false);
+        }};
+        for (Map.Entry<String, Boolean> entry : cases.entrySet()) {
+            String key = entry.getKey();
+            byte[] bytes = key.getBytes(StandardCharsets.UTF_8);
+            boolean res = Tokenizer.TokenParser.FUNCTION.isByteStartOfToken(bytes, 0);
+            Assert.assertEquals(entry.getValue(), res);
+        }
+    }
+
+    /**
+     * @given function token parser
+     * @expected return the function token
+     **/
+    @Test
+    public void test_parseToken_given_functionParser_then_returnFunctionToken() {
+        Map<String, TokenCase> cases = new HashMap<String, TokenCase>() {{
+            put("avg()", new TokenCase(5, "avg()"));
+            put("abc(1+2)", new TokenCase(8, "abc(1.00+2.00)"));
+            put("sum( a + b ) ", new TokenCase(12, "sum(a+b)"));
+        }};
+        for (Map.Entry<String, TokenCase> entry : cases.entrySet()) {
+            String key = entry.getKey();
+            TokenCase expected = entry.getValue();
+            Tokenizer.TokenRes tokenRes = Tokenizer.TokenParser.FUNCTION.parseToken(key.getBytes(StandardCharsets.UTF_8), 0);
+            Assert.assertTrue(tokenRes.getToken() instanceof FunctionToken);
+            Assert.assertEquals(expected.size, tokenRes.getSize());
+            FunctionToken token = (FunctionToken) tokenRes.getToken();
+            Assert.assertEquals(expected.expected, token.toText());
+        }
+    }
+
+    /**
+     * @given formula bytes
+     * @expected iterate parser in order
+     **/
+    @Test
+    public void test_findTokenParser_given_bytes_then_iterateInOrder() {
+        Map<String, Tokenizer.TokenParser> cases = new HashMap<String, Tokenizer.TokenParser>() {{
+            put("ab_c(a+b)", Tokenizer.TokenParser.FUNCTION);
+            put("abc", Tokenizer.TokenParser.IDENTIFIER);
+            put("12", Tokenizer.TokenParser.DECIMAL);
+            put("()", Tokenizer.TokenParser.PARENTHESIS);
+            put(")", Tokenizer.TokenParser.PARENTHESIS);
+            put("+", Tokenizer.TokenParser.OPERATOR);
+            put(" ", Tokenizer.TokenParser.WHITE_SPACE);
+        }};
+        Tokenizer tokenizer = Tokenizer.build();
+        for (Map.Entry<String, Tokenizer.TokenParser> entry : cases.entrySet()) {
+            byte[] bytes = entry.getKey().getBytes(StandardCharsets.UTF_8);
+            Tokenizer.TokenParser res = tokenizer.findTokenParser(bytes, 0);
+            Assert.assertEquals(entry.getValue(), res);
+        }
+    }
+
+
+    /**
+     * @given formula bytes with unsupported token
+     * @expected exception
+     **/
+    @Test(expected = FormulaException.class)
+    public void test_findTokenParser_given_bytesContainsUnSupportedToken_then_exception() {
+        String expr = "a_bc";
+        Tokenizer tokenizer = Tokenizer.build();
+        try {
+            tokenizer.findTokenParser(expr.getBytes(StandardCharsets.UTF_8), 1);
+        } catch (FormulaException exception) {
+            Assert.assertEquals("unknown token type:_bc", exception.getMessage());
+            throw exception;
         }
     }
 
