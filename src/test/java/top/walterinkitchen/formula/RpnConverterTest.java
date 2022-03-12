@@ -7,12 +7,15 @@ import top.walterinkitchen.formula.operator.OperatorFactory;
 import top.walterinkitchen.formula.token.DecimalToken;
 import top.walterinkitchen.formula.token.IdentifierToken;
 import top.walterinkitchen.formula.token.OperatorToken;
+import top.walterinkitchen.formula.token.ParenthesisToken;
 import top.walterinkitchen.formula.token.Token;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -69,8 +72,57 @@ public class RpnConverterTest {
         Assert.assertEquals("abc*+d-ef/g*+", stringifyTokens(res));
     }
 
+    /**
+     * @given tokens contains '(' and ')'
+     * @expected with correct order
+     **/
+    @Test
+    public void test_convertToRpn_given_tokensContainsParentheses_then_withRightOrder() {
+        List<Token> tokens = createTokens(Arrays.asList("a", "*", "(", "b", "+", "c", ")"));
+        List<Token> res = converter.convertToRpn(tokens);
+        Assert.assertEquals("abc+*", stringifyTokens(res));
+    }
+
+    /**
+     * @given given a couple of groups that the key is tokens and the value is expected
+     * @expected the convert result should equal to the expected
+     **/
+    @Test
+    public void test_convertToRpn_given_source_then_shouldEqualExpected() {
+        Map<String, String> cases = buildCases();
+        for (Map.Entry<String, String> cse : cases.entrySet()) {
+            List<Token> res = converter.convertToRpn(createTokens(cse.getKey()));
+            Assert.assertEquals(cse.getValue(), stringifyTokens(res));
+        }
+    }
+
+    private Map<String, String> buildCases() {
+        Map<String, String> res = new HashMap<>();
+        res.put("abc", "abc");
+        res.put("a+b-c", "ab+c-");
+        res.put("a*b/c", "ab*c/");
+        res.put("a+b*c", "abc*+");
+        res.put("a*b+c", "ab*c+");
+        res.put("a*b/c+d", "ab*c/d+");
+        res.put("a*b+c/d", "ab*cd/+");
+        res.put("a+b*c/d", "abc*d/+");
+        res.put("a+(b)", "ab+");
+        res.put("a+(b-c)", "abc-+");
+        res.put("a*(b-c)", "abc-*");
+        res.put("a*(b*(c-d))", "abcd-**");
+        res.put("a*(b*(c-d))+e", "abcd-**e+");
+        res.put("a+(b*(c-d))+e", "abcd-*+e+");
+        res.put("a+(b*(c-d))/e", "abcd-*e/+");
+        return res;
+    }
+
     private String stringifyTokens(List<Token> tokens) {
         return tokens.stream().map(Token::toText).collect(Collectors.joining());
+    }
+
+    private List<Token> createTokens(String source) {
+        List<String> tokens = Arrays.stream(source.split("")).collect(Collectors.toList());
+        return createTokens(tokens);
     }
 
     private List<Token> createTokens(List<String> source) {
@@ -89,6 +141,12 @@ public class RpnConverterTest {
             case "/": {
                 Operator operator = OperatorFactory.buildOperator(src);
                 return OperatorToken.builder().setOperator(operator).build();
+            }
+            case "(": {
+                return ParenthesisToken.buildOpen();
+            }
+            case ")": {
+                return ParenthesisToken.buildClose();
             }
             default:
                 break;

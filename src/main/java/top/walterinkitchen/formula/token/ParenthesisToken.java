@@ -36,6 +36,16 @@ public class ParenthesisToken implements Token, Section {
         return this.type.symbol;
     }
 
+    @Override
+    public boolean isOpen() {
+        return this.type == Type.OPEN;
+    }
+
+    @Override
+    public boolean isClose() {
+        return this.type == Type.CLOSE;
+    }
+
     protected enum Type {
         OPEN("("),
         CLOSE(")");

@@ -53,7 +53,37 @@ public class RpnConverter {
     }
 
     private void enqueueSection(Token token) {
+        Section section = (Section) token;
+        if (section.isOpen()) {
+            this.operatorQ.addLast(token);
+            this.operandQ.add(token);
+            return;
+        }
+        Deque<Token> operands = dumpsAllTillSectionOpen(this.operandQ);
+        Deque<Token> operators = dumpsAllTillSectionOpen(this.operatorQ);
+        this.operandQ.addAll(operands);
+        this.operandQ.addAll(operators);
+    }
 
+    private Deque<Token> dumpsAllTillSectionOpen(Deque<Token> queue) {
+        Deque<Token> res = new LinkedList<>();
+        while (!queue.isEmpty()) {
+            Token next = queue.removeLast();
+            if (!isTokenSectionOpen(next)) {
+                res.addFirst(next);
+                continue;
+            }
+            break;
+        }
+        return res;
+    }
+
+    private boolean isTokenSectionOpen(Token token) {
+        if (!(token instanceof Section)) {
+            return false;
+        }
+        Section section = (Section) token;
+        return section.isOpen();
     }
 
     private void enqueueOperator(Token token) {
