@@ -13,4 +13,11 @@ public interface Operator {
      * @return string
      */
     String toText();
+
+    /**
+     * get priority
+     *
+     * @return priority
+     */
+    int getPriority();
 }

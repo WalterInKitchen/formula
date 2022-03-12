@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
  * @author walter
  * @date 2022/3/7
  **/
-public class FunctionToken implements Token {
+public class FunctionToken implements Token, Operand {
     private final String name;
     private final List<Token> args;
 

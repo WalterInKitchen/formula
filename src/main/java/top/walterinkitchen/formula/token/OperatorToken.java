@@ -9,7 +9,7 @@ import top.walterinkitchen.formula.operator.Operator;
  * @author walter
  * @date 2022/3/7
  **/
-public class OperatorToken implements Token {
+public class OperatorToken implements Token, Operable {
     private final Operator operator;
 
     @Builder(setterPrefix = "set", toBuilder = true)
@@ -20,5 +20,10 @@ public class OperatorToken implements Token {
     @Override
     public String toText() {
         return this.operator.toText();
+    }
+
+    @Override
+    public int getPriority() {
+        return operator.getPriority();
     }
 }

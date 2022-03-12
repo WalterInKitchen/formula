@@ -9,7 +9,7 @@ import lombok.Getter;
  * @author walter
  * @date 2022/3/7
  **/
-public class IdentifierToken implements Token {
+public class IdentifierToken implements Token, Operand {
     @Getter
     private final String identifier;
 

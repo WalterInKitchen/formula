@@ -6,7 +6,7 @@ package top.walterinkitchen.formula.token;
  * @author walter
  * @date 2022/3/9
  **/
-public class ParenthesisToken implements Token {
+public class ParenthesisToken implements Token, Section {
     private final Type type;
 
     private ParenthesisToken(Type type) {

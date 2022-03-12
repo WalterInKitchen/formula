@@ -12,7 +12,7 @@ import java.math.BigDecimal;
  * @author walter
  * @date 2022/3/7
  **/
-public class DecimalToken implements Token {
+public class DecimalToken implements Token, Operand {
     @Getter
     private final BigDecimal decimal;
 

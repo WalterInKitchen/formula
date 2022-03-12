@@ -11,4 +11,9 @@ public class Subtraction implements Operator {
     public String toText() {
         return "-";
     }
+
+    @Override
+    public int getPriority() {
+        return 10;
+    }
 }
