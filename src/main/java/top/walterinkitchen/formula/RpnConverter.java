@@ -111,8 +111,8 @@ public class RpnConverter {
         }
     }
 
-    private boolean isFirstOperatorHasLowerPriority(Operable operable, Operable last) {
-        return operable.getPriority() >= last.getPriority();
+    private boolean isFirstOperatorHasLowerPriority(Operable first, Operable second) {
+        return first.getPriority() >= second.getPriority();
     }
 
     private List<Token> dumpQueue() {
