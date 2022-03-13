@@ -31,22 +31,27 @@ public class AvgFunction implements Function {
     @Override
     public BigDecimal resolveResult(List<Token> args, Context context) throws FormulaException {
         IdentifierToken identifierToken = tryToGetIdentifierTokenOrAssert(args);
-        if (identifierToken == null) {
-            return null;
-        }
-        List<BigDecimal> decimals = context.getDecimalListByIdentifier(identifierToken.getIdentifier());
+        List<BigDecimal> decimals = getDecimalsOrAssertIfNull(context, identifierToken);
         if (CollectionUtils.isEmpty(decimals)) {
-            return null;
+            return BigDecimal.ZERO;
         }
         Optional<BigDecimal> sum = decimals.stream().reduce(BigDecimal::add);
         return sum.map(decimal -> decimal.divide(new BigDecimal(decimals.size()), Config.DECIMAL_SCALE, RoundingMode.HALF_UP)).orElse(BigDecimal.ZERO);
+    }
+
+    private List<BigDecimal> getDecimalsOrAssertIfNull(Context context, IdentifierToken identifierToken) {
+        List<BigDecimal> decimals = context.getDecimalListByIdentifier(identifierToken.getIdentifier());
+        if (decimals == null) {
+            throw new FormulaException("function avg's identifier " + identifierToken.getIdentifier() + "'s value can not be");
+        }
+        return decimals;
     }
 
     private IdentifierToken tryToGetIdentifierTokenOrAssert(List<Token> args) {
         assertIfArgsIsOne(args);
         Optional<Token> optToken = args.stream().findFirst();
         if (!optToken.isPresent()) {
-            return null;
+            throw new FormulaException("function avg needs one valid operand");
         }
         Token arg = optToken.get();
         assertIfArgIsIdentifier(arg);

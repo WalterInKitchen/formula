@@ -53,6 +53,24 @@ public class AvgFunctionTest {
     }
 
     /**
+     * @given context return decimals is null
+     * @expected exception
+     **/
+    @Test(expected = FormulaException.class)
+    public void test_resolveResult_given_argListIsNull_then_throwException(@Mocked Context context, @Mocked IdentifierToken identifierToken) {
+        new Expectations() {{
+            identifierToken.getIdentifier();
+            result = "id";
+            context.getDecimalListByIdentifier("id");
+            result = null;
+        }};
+        avgFunction.resolveResult(Collections.singletonList(identifierToken), context);
+        new Verifications() {{
+            context.getDecimalListByIdentifier("id");
+        }};
+    }
+
+    /**
      * @given one arg and the arg is not identifier
      * @expected get list<BigDecimal> from context
      **/
@@ -81,7 +99,7 @@ public class AvgFunctionTest {
             result = Collections.emptyList();
         }};
         BigDecimal res = avgFunction.resolveResult(Collections.singletonList(identifierToken), context);
-        Assert.assertNull(res);
+        Assert.assertEquals(0, res.compareTo(BigDecimal.ZERO));
     }
 
     /**
