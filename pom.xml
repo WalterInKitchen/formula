@@ -8,8 +8,32 @@
     <artifactId>formula</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://github.com/WalterInKitchen/formula/blob/master/LICENSE</url>
+        </license>
+    </licenses>
+
+    <scm>
+        <connection>https://github.com/WalterInKitchen/formula.git</connection>
+        <url>https://github.com/WalterInKitchen/formula</url>
+    </scm>
+
+    <developers>
+        <developer>
+            <name>walter</name>
+            <email>walterInKitchen@outlook.com</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>+8</timezone>
+        </developer>
+    </developers>
+
     <name>formula</name>
     <url>https://github.com/WalterInKitchen/formula</url>
+    <packaging>jar</packaging>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
