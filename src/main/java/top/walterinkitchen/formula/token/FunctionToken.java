@@ -2,6 +2,8 @@ package top.walterinkitchen.formula.token;
 
 import lombok.Builder;
 import top.walterinkitchen.formula.Context;
+import top.walterinkitchen.formula.function.Function;
+import top.walterinkitchen.formula.function.FunctionFactory;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -33,7 +35,7 @@ public class FunctionToken implements Operand {
 
     @Override
     public BigDecimal decimalValue(Context context) {
-        // TODO
-        return null;
+        Function function = FunctionFactory.findFunctionByName(this.name);
+        return function.resolveResult(args, context);
     }
 }
