@@ -2,6 +2,7 @@ package top.walterinkitchen.formula.token;
 
 import lombok.Builder;
 import lombok.Getter;
+import top.walterinkitchen.formula.Context;
 import top.walterinkitchen.formula.util.DecimalFormatter;
 
 import java.math.BigDecimal;
@@ -12,7 +13,7 @@ import java.math.BigDecimal;
  * @author walter
  * @date 2022/3/7
  **/
-public class DecimalToken implements Token, Operand {
+public class DecimalToken implements Operand {
     @Getter
     private final BigDecimal decimal;
 
@@ -24,5 +25,10 @@ public class DecimalToken implements Token, Operand {
     @Override
     public String toText() {
         return DecimalFormatter.formatDecimal(this.decimal);
+    }
+
+    @Override
+    public BigDecimal decimalValue(Context context) {
+        return this.decimal;
     }
 }

@@ -50,4 +50,11 @@ public class OperandStack {
     public boolean isEmpty() {
         return stack.isEmpty();
     }
+
+    /**
+     * clear stack
+     */
+    public void clear() {
+        stack.clear();
+    }
 }

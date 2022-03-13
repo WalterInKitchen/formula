@@ -90,4 +90,15 @@ public class OperandStackTest {
         stack.push(operand);
         Assert.assertFalse(stack.isEmpty());
     }
+
+    /**
+     * @given stack with one element
+     * @expected stack will be empty after clear
+     **/
+    @Test
+    public void test_clear_given_stackWithOneElements_then_stackBecomeEmpty(@Mocked Operand operand) {
+        stack.push(operand);
+        stack.clear();
+        Assert.assertTrue(stack.isEmpty());
+    }
 }
