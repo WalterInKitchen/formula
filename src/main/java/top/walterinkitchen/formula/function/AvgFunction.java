@@ -42,7 +42,7 @@ public class AvgFunction implements Function {
     private List<BigDecimal> getDecimalsOrAssertIfNull(Context context, IdentifierToken identifierToken) {
         List<BigDecimal> decimals = context.getDecimalListByIdentifier(identifierToken.getIdentifier());
         if (decimals == null) {
-            throw new FormulaException("function avg's identifier " + identifierToken.getIdentifier() + "'s value can not be");
+            throw new FormulaException("function avg identifier " + identifierToken.getIdentifier() + "'s value can not be");
         }
         return decimals;
     }
