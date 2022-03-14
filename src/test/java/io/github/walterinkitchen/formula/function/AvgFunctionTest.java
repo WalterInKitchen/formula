@@ -1,15 +1,14 @@
 package io.github.walterinkitchen.formula.function;
 
+import io.github.walterinkitchen.formula.Context;
+import io.github.walterinkitchen.formula.exception.FormulaException;
+import io.github.walterinkitchen.formula.token.IdentifierToken;
 import mockit.Expectations;
 import mockit.Mocked;
 import mockit.Tested;
 import mockit.Verifications;
 import org.junit.Assert;
 import org.junit.Test;
-import io.github.walterinkitchen.formula.Context;
-import io.github.walterinkitchen.formula.exception.FormulaException;
-import io.github.walterinkitchen.formula.token.IdentifierToken;
-import io.github.walterinkitchen.formula.token.Operand;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -31,25 +30,7 @@ public class AvgFunctionTest {
      **/
     @Test(expected = FormulaException.class)
     public void test_resolveResult_given_emptyArgs_then_throwException(@Mocked Context context) {
-        avgFunction.resolveResult(Collections.emptyList(), context);
-    }
-
-    /**
-     * @given two args
-     * @expected exception
-     **/
-    @Test(expected = FormulaException.class)
-    public void test_resolveResult_given_twoArgs_then_throwException(@Mocked Context context, @Mocked Operand operand) {
-        avgFunction.resolveResult(Arrays.asList(operand, operand), context);
-    }
-
-    /**
-     * @given one arg and the arg is not identifier
-     * @expected exception
-     **/
-    @Test(expected = FormulaException.class)
-    public void test_resolveResult_given_nonIdentifierArg_then_throwException(@Mocked Context context, @Mocked Operand operand) {
-        avgFunction.resolveResult(Collections.singletonList(operand), context);
+        avgFunction.resolveResult(null, context);
     }
 
     /**
@@ -64,7 +45,7 @@ public class AvgFunctionTest {
             context.getDecimalListByIdentifier("id");
             result = null;
         }};
-        avgFunction.resolveResult(Collections.singletonList(identifierToken), context);
+        avgFunction.resolveResult(identifierToken, context);
         new Verifications() {{
             context.getDecimalListByIdentifier("id");
         }};
@@ -80,7 +61,7 @@ public class AvgFunctionTest {
             identifierToken.getIdentifier();
             result = "id";
         }};
-        avgFunction.resolveResult(Collections.singletonList(identifierToken), context);
+        avgFunction.resolveResult(identifierToken, context);
         new Verifications() {{
             context.getDecimalListByIdentifier("id");
         }};
@@ -98,7 +79,7 @@ public class AvgFunctionTest {
             context.getDecimalListByIdentifier("id");
             result = Collections.emptyList();
         }};
-        BigDecimal res = avgFunction.resolveResult(Collections.singletonList(identifierToken), context);
+        BigDecimal res = avgFunction.resolveResult(identifierToken, context);
         Assert.assertEquals(0, res.compareTo(BigDecimal.ZERO));
     }
 
@@ -114,7 +95,7 @@ public class AvgFunctionTest {
             context.getDecimalListByIdentifier("id");
             result = Arrays.asList(BigDecimal.ONE, new BigDecimal("10"));
         }};
-        BigDecimal res = avgFunction.resolveResult(Collections.singletonList(identifierToken), context);
+        BigDecimal res = avgFunction.resolveResult(identifierToken, context);
         Assert.assertEquals(0, res.compareTo(new BigDecimal("5.5")));
     }
 }

@@ -1,11 +1,10 @@
 package io.github.walterinkitchen.formula.function;
 
-import io.github.walterinkitchen.formula.exception.FormulaException;
-import io.github.walterinkitchen.formula.token.Token;
 import io.github.walterinkitchen.formula.Context;
+import io.github.walterinkitchen.formula.exception.FormulaException;
+import io.github.walterinkitchen.formula.token.Operand;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 /**
  * function
@@ -24,10 +23,10 @@ public interface Function {
     /**
      * resolve te function result
      *
-     * @param args    function args
+     * @param arg     function arg
      * @param context ctx
      * @return the result or null
      * @throws FormulaException exception
      */
-    BigDecimal resolveResult(List<Token> args, Context context) throws FormulaException;
+    BigDecimal resolveResult(Operand arg, Context context) throws FormulaException;
 }

@@ -1,5 +1,6 @@
 package io.github.walterinkitchen.formula.function;
 
+import io.github.walterinkitchen.formula.token.Operand;
 import io.github.walterinkitchen.formula.token.Token;
 import io.github.walterinkitchen.formula.util.CollectionUtils;
 import io.github.walterinkitchen.formula.Context;
@@ -29,9 +30,9 @@ public class AvgFunction implements Function {
     }
 
     @Override
-    public BigDecimal resolveResult(List<Token> args, Context context) throws FormulaException {
-        IdentifierToken identifierToken = tryToGetIdentifierTokenOrAssert(args);
-        List<BigDecimal> decimals = getDecimalsOrAssertIfNull(context, identifierToken);
+    public BigDecimal resolveResult(Operand arg, Context context) throws FormulaException {
+        assertIfArgIsIdentifier(arg);
+        List<BigDecimal> decimals = getDecimalsOrAssertIfNull(context, (IdentifierToken) arg);
         if (CollectionUtils.isEmpty(decimals)) {
             return BigDecimal.ZERO;
         }
@@ -47,26 +48,9 @@ public class AvgFunction implements Function {
         return decimals;
     }
 
-    private IdentifierToken tryToGetIdentifierTokenOrAssert(List<Token> args) {
-        assertIfArgsIsOne(args);
-        Optional<Token> optToken = args.stream().findFirst();
-        if (!optToken.isPresent()) {
-            throw new FormulaException("function avg needs one valid operand");
-        }
-        Token arg = optToken.get();
-        assertIfArgIsIdentifier(arg);
-        return (IdentifierToken) arg;
-    }
-
     private void assertIfArgIsIdentifier(Token token) {
         if (!(token instanceof IdentifierToken)) {
-            throw new FormulaException("function avg needs one identifier arg, but it's not an identifier:" + token.toText());
-        }
-    }
-
-    private void assertIfArgsIsOne(List<Token> args) {
-        if (args.size() != 1) {
-            throw new FormulaException("function avg needs one args, but it provided " + args.size());
+            throw new FormulaException("function avg needs one identifier arg, but it's not an identifier");
         }
     }
 }

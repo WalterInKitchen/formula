@@ -26,6 +26,23 @@ public class ResultResolver {
      * @throws FormulaException throw exception when can not resolve result
      */
     public BigDecimal resolveResult(List<Token> tokens, Context context) throws FormulaException {
+        Operand operand = resolveResultToOperand(tokens, context);
+        BigDecimal decimal = operand.decimalValue(context);
+        if (decimal == null) {
+            throw new FormulaException("decimal value is invalid:" + operand.toText());
+        }
+        return decimal;
+    }
+
+    /**
+     * resolve result
+     *
+     * @param tokens  the rpn tokens
+     * @param context context
+     * @return result
+     * @throws FormulaException throw exception when can not resolve result
+     */
+    public Operand resolveResultToOperand(List<Token> tokens, Context context) throws FormulaException {
         for (Token token : tokens) {
             if (token instanceof Operand) {
                 stack.push((Operand) token);
@@ -41,11 +58,6 @@ public class ResultResolver {
         if (stack.isEmpty()) {
             throw new FormulaException("invalid token stream, no result in stack");
         }
-        Operand pop = stack.pop();
-        BigDecimal decimal = pop.decimalValue(context);
-        if (decimal == null) {
-            throw new FormulaException("decimal value is invalid:" + pop.toText());
-        }
-        return decimal;
+        return stack.pop();
     }
 }

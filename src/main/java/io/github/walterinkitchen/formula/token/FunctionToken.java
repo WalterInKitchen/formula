@@ -1,9 +1,11 @@
 package io.github.walterinkitchen.formula.token;
 
+import io.github.walterinkitchen.formula.Context;
+import io.github.walterinkitchen.formula.ResultResolver;
+import io.github.walterinkitchen.formula.RpnConverter;
 import io.github.walterinkitchen.formula.function.Function;
 import io.github.walterinkitchen.formula.function.FunctionFactory;
 import lombok.Builder;
-import io.github.walterinkitchen.formula.Context;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -36,6 +38,10 @@ public class FunctionToken implements Operand {
     @Override
     public BigDecimal decimalValue(Context context) {
         Function function = FunctionFactory.findFunctionByName(this.name);
-        return function.resolveResult(args, context);
+        RpnConverter rpnConverter = new RpnConverter();
+        List<Token> rpn = rpnConverter.convertToRpn(args);
+        ResultResolver resultResolver = new ResultResolver();
+        Operand operand = resultResolver.resolveResultToOperand(rpn, context);
+        return function.resolveResult(operand, context);
     }
 }
