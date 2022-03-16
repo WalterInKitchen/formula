@@ -21,6 +21,17 @@ public class FunctionFactoryTest {
     }
 
     /**
+     * @given max function name
+     * @expected return function instance
+     **/
+    @Test
+    public void test_findFunctionByName_given_maxFunctionName_then_functionInstance() {
+        Function avg = FunctionFactory.findFunctionByName("max");
+        Assert.assertTrue(avg instanceof MaxFunction);
+    }
+
+
+    /**
      * @given name that not registered
      * @expected exception
      **/

@@ -14,6 +14,7 @@ public class FunctionFactory {
 
     static {
         register(new AvgFunction());
+        register(new MaxFunction());
     }
 
     private FunctionFactory() {
