@@ -81,6 +81,7 @@ public class FormulaResolverTest {
                 {"avg(b1)*3+2", "8"},
                 {"avg(b1)*avg(a1)-1", "39"},
                 {"max(a1)", "30"},
+                {"a*(b+c)", "1250"},
         });
     }
 

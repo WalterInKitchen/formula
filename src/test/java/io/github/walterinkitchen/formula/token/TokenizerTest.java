@@ -232,6 +232,13 @@ public class TokenizerTest {
             put("xyz(a)", true);
             put("xyz()", true);
             put("x_a() ", true);
+            put("x*a(b) ", false);
+            put("x-a(b) ", false);
+            put("x+a(b) ", false);
+            put("x/a(b) ", false);
+            put("x=a(b) ", false);
+            put("() ", false);
+            put(" () ", false);
             put("xyz( ", false);
             put("xyz(a", false);
             put("xyz", false);
@@ -254,6 +261,7 @@ public class TokenizerTest {
             put("avg()", new TokenCase(5, "avg()"));
             put("abc(1+2)", new TokenCase(8, "abc(1.00+2.00)"));
             put("sum( a + b ) ", new TokenCase(12, "sum(a+b)"));
+            put("( a + b ) ", new TokenCase(9, "(a+b)"));
         }};
         for (Map.Entry<String, TokenCase> entry : cases.entrySet()) {
             String key = entry.getKey();
@@ -288,7 +296,6 @@ public class TokenizerTest {
             Assert.assertEquals(entry.getValue(), res);
         }
     }
-
 
     /**
      * @given formula bytes with unsupported token

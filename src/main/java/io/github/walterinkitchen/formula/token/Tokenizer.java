@@ -111,16 +111,14 @@ public class Tokenizer {
             @Override
             boolean isByteStartOfToken(byte[] bytes, int position) {
                 final int length = bytes.length;
-                if (!isByteAlphabet(bytes[position])) {
+                int index = findFirstNotFunctionNameByteIndex(bytes, position, length);
+                if (index >= length) {
                     return false;
                 }
-                int index = position;
-                while (true) {
-                    if (index >= length || !isByteFunctionNameBody(bytes[index]) || bytes[index++] == '(') {
-                        break;
-                    }
+                if (index == 0) {
+                    return false;
                 }
-                if (index >= length) {
+                if (bytes[index] != '(') {
                     return false;
                 }
                 while (true) {
@@ -129,6 +127,17 @@ public class Tokenizer {
                     }
                 }
                 return index < length || bytes[index - 1] == ')';
+            }
+
+            private int findFirstNotFunctionNameByteIndex(byte[] bytes, int position, int length) {
+                if (!isByteAlphabet(bytes[position])) {
+                    return 0;
+                }
+                int index = position;
+                while (index < length && isByteFunctionNameBody(bytes[index])) {
+                    index++;
+                }
+                return index;
             }
 
             @Override

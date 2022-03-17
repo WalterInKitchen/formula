@@ -39,7 +39,7 @@ public class FunctionFactory {
     public static Function findFunctionByName(String name) throws FunctionNotExistException {
         Function function = FUNCTIONS.get(name);
         if (function == null) {
-            throw new FunctionNotExistException(name, "function not registered");
+            throw new FunctionNotExistException(name, "function not registered:" + name);
         }
         return function;
     }
