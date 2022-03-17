@@ -6,7 +6,7 @@
 
     <groupId>io.github.walterinkitchen</groupId>
     <artifactId>formula</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <description>简单的支持加减乘除的代数公式求解库</description>
 
     <licenses>
