@@ -16,7 +16,9 @@ public interface Context {
      * @param identifier identifier name
      * @return decimal
      */
-    BigDecimal getDecimalValueOfIdentifier(String identifier);
+    default BigDecimal getDecimalValueOfIdentifier(String identifier) {
+        return null;
+    }
 
     /**
      * get the list of decimals
@@ -24,5 +26,7 @@ public interface Context {
      * @param identifier the identifier name
      * @return list
      */
-    List<BigDecimal> getDecimalListByIdentifier(String identifier);
+    default List<BigDecimal> getDecimalListByIdentifier(String identifier) {
+        return null;
+    }
 }
