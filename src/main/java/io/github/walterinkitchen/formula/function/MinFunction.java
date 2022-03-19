@@ -4,7 +4,6 @@ import io.github.walterinkitchen.formula.Context;
 import io.github.walterinkitchen.formula.exception.FormulaException;
 import io.github.walterinkitchen.formula.token.IdentifierToken;
 import io.github.walterinkitchen.formula.token.Operand;
-import io.github.walterinkitchen.formula.token.Token;
 import io.github.walterinkitchen.formula.util.CollectionUtils;
 
 import java.math.BigDecimal;
@@ -12,15 +11,15 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * function that calculate the max value of args<br/>
+ * function that calculate the min value of args<br/>
  * args should be an identifier,this function will first get the args from context
- * and find the max one return
+ * and find the min one return
  *
  * @author walter
- * @date 2022/3/16
+ * @date 2022/3/19
  **/
-public class MaxFunction implements Function {
-    private static final String NAME = "max";
+public class MinFunction extends MaxFunction {
+    private static final String NAME = "min";
 
     @Override
     public String getName() {
@@ -34,20 +33,6 @@ public class MaxFunction implements Function {
         if (CollectionUtils.isEmpty(decimals)) {
             return BigDecimal.ZERO;
         }
-        return Collections.max(decimals);
-    }
-
-    protected void assertIfArgIsIdentifier(Token token) {
-        if (!(token instanceof IdentifierToken)) {
-            throw new FormulaException("function max needs one identifier arg, but it's not an identifier");
-        }
-    }
-
-    protected List<BigDecimal> getDecimalsOrAssertIfNull(Context context, IdentifierToken identifierToken) {
-        List<BigDecimal> decimals = context.getDecimalListByIdentifier(identifierToken.getIdentifier());
-        if (decimals == null) {
-            throw new FormulaException("function max identifier " + identifierToken.getIdentifier() + "'s value can not be null");
-        }
-        return decimals;
+        return Collections.min(decimals);
     }
 }

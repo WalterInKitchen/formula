@@ -30,6 +30,15 @@ public class FunctionFactoryTest {
         Assert.assertTrue(avg instanceof MaxFunction);
     }
 
+    /**
+     * @given min function name
+     * @expected return function instance
+     **/
+    @Test
+    public void test_findFunctionByName_given_minFunctionName_then_functionInstance() {
+        Function avg = FunctionFactory.findFunctionByName("min");
+        Assert.assertTrue(avg instanceof MinFunction);
+    }
 
     /**
      * @given name that not registered
