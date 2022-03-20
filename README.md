@@ -107,3 +107,43 @@ max,min,avg
 decimalScale=2
 ```
 
+#### 注册自己的函数
+实现接口：
+io.github.walterinkitchen.formula.function.Function </br>
+提供一个public的无参构造器<br>
+为函数提供一个名字：不带括号与空格，仅支持字符组成的函数名<br/>
+```java
+/**
+ * 自定义函数
+ *
+ * @author walter
+ * @date 2022/3/20
+ **/
+public class CustomerFunction implements Function {
+    // 一个public的无参构造器
+    public CustomerFunction() {
+    }
+
+    @Override
+    public String getName() {
+        // 返回函数盟
+        return "customerFunction";
+    }
+
+    @Override
+    public BigDecimal resolveResult(Operand arg, Context context) throws FormulaException {
+        // 实现该方法将参数计算为函数结果返回
+        return null;
+    }
+}
+
+```
+最后一步：注册函数<br>
+在"resources/META-INF/services"目录下(如果没有该目录，需要先创建该目录)创建文件：”io.github.walterinkitchen.formula.function.Function“<br/>
+文件中每一行为自定义函数的类的全名
+```text
+resources/
+├── META-INF
+│   └── services
+│       └── io.github.walterinkitchen.formula.function.Function //注册文件
+```
