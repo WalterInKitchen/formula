@@ -37,7 +37,7 @@ public class AvgFunction implements Function {
             return BigDecimal.ZERO;
         }
         Optional<BigDecimal> sum = decimals.stream().reduce(BigDecimal::add);
-        return sum.map(decimal -> decimal.divide(new BigDecimal(decimals.size()), Config.DECIMAL_SCALE, RoundingMode.HALF_UP)).orElse(BigDecimal.ZERO);
+        return sum.map(decimal -> decimal.divide(new BigDecimal(decimals.size()), Config.getScale(), RoundingMode.HALF_UP)).orElse(BigDecimal.ZERO);
     }
 
     private List<BigDecimal> getDecimalsOrAssertIfNull(Context context, IdentifierToken identifierToken) {

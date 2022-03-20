@@ -35,7 +35,7 @@ public class Division implements Operator {
         assertIfDecimalIsInValid(decimal2);
         assertIfDecimalIsInValid(decimal1);
         assertIfOperand2IsZero(decimal2);
-        return DecimalToken.builder().setDecimal(decimal1.divide(decimal2, Config.DECIMAL_SCALE, RoundingMode.HALF_UP)).build();
+        return DecimalToken.builder().setDecimal(decimal1.divide(decimal2, Config.getScale(), RoundingMode.HALF_UP)).build();
     }
 
     private void assertIfOperand2IsZero(BigDecimal decimal) {

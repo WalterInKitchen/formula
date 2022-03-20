@@ -17,7 +17,7 @@ public class DecimalFormatter {
      * @return the string
      */
     public static String formatDecimal(BigDecimal decimal) {
-        BigDecimal bigDecimal = decimal.setScale(Config.DECIMAL_SCALE, RoundingMode.HALF_UP);
+        BigDecimal bigDecimal = decimal.setScale(Config.getScale(), RoundingMode.HALF_UP);
         return bigDecimal.toString();
     }
 }
