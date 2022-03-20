@@ -40,7 +40,7 @@ BigDecimal res = resolver.resolveResult("a*(b+c)/100", context);
 System.out.println(res); // res=0.5
 ```
 
-### 支持的语法
+### 支持的特性
 #### 自定义的变量名
 ```java
 // 变量名由至少一个字母组成
