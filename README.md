@@ -93,7 +93,7 @@ Context context = new Context() {
 #### 函数
 ##### 默认支持的函数:
 max,min,avg
-他们都要求变量为一个变量，且变量类型为Decimal集合类型
+他们都要求括号内为一个变量，且变量类型为Decimal集合类型
 ```java
 "a*max(b)" // a*b中的最大值
 ```
