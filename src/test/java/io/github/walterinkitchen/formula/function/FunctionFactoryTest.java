@@ -48,4 +48,14 @@ public class FunctionFactoryTest {
     public void test_findFunctionByName_given_unRegisteredFunctionName_then_Exception() {
         Function avg = FunctionFactory.findFunctionByName("functionName");
     }
+
+    /**
+     * @given the user defined function
+     * @expected the function instance
+     **/
+    @Test
+    public void test_findFunctionByName_given_userProvidedFunctionName_then_returnInstance() {
+        Function func = FunctionFactory.findFunctionByName("customerFunction");
+        Assert.assertTrue(func instanceof CustomerFunction);
+    }
 }

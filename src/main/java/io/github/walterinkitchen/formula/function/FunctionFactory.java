@@ -1,7 +1,9 @@
 package io.github.walterinkitchen.formula.function;
 
+import javax.validation.constraints.NotBlank;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ServiceLoader;
 
 /**
  * The function factory
@@ -11,6 +13,9 @@ import java.util.Map;
  **/
 public class FunctionFactory {
     private static final Map<String, Function> FUNCTIONS = new HashMap<>();
+    private static final FunctionFactory factory = new FunctionFactory();
+
+    private final ServiceLoader<Function> loader;
 
     static {
         register(new AvgFunction());
@@ -19,6 +24,7 @@ public class FunctionFactory {
     }
 
     private FunctionFactory() {
+        this.loader = ServiceLoader.load(Function.class);
     }
 
     /**
@@ -26,7 +32,7 @@ public class FunctionFactory {
      *
      * @param function function to be register
      */
-    public static void register(Function function) {
+    protected static void register(Function function) {
         FUNCTIONS.put(function.getName(), function);
     }
 
@@ -37,11 +43,23 @@ public class FunctionFactory {
      * @return function instance
      * @throws FunctionNotExistException throw exception if function not found
      */
-    public static Function findFunctionByName(String name) throws FunctionNotExistException {
+    public static Function findFunctionByName(@NotBlank String name) throws FunctionNotExistException {
         Function function = FUNCTIONS.get(name);
         if (function == null) {
-            throw new FunctionNotExistException(name, "function not registered:" + name);
+            function = loadFromLoaders(name);
+            if (function == null) {
+                throw new FunctionNotExistException(name, "function not registered:" + name);
+            }
         }
         return function;
+    }
+
+    private static Function loadFromLoaders(String name) {
+        for (Function fc : factory.loader) {
+            if (name.equals(fc.getName())) {
+                return fc;
+            }
+        }
+        return null;
     }
 }

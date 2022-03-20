@@ -20,6 +20,9 @@ import java.util.List;
  * @date 2022/3/16
  **/
 public class MaxFunction implements Function {
+    public MaxFunction() {
+    }
+
     private static final String NAME = "max";
 
     @Override
