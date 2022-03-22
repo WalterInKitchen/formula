@@ -1,5 +1,6 @@
 package io.github.walterinkitchen.formula;
 
+import io.github.walterinkitchen.formula.exception.FormulaException;
 import io.github.walterinkitchen.formula.operator.Operator;
 import io.github.walterinkitchen.formula.operator.OperatorFactory;
 import io.github.walterinkitchen.formula.token.Token;
@@ -67,6 +68,16 @@ public class ResultResolverTest {
         List<Token> tokens = buildTokens("100 0.5 *");
         BigDecimal res = resultResolver.resolveResult(tokens, context);
         assertDecimalEquals(res, "50");
+    }
+
+    /**
+     * @given tokens 100 0.5 30 +
+     * @expected throw exception because there was one token not processed
+     **/
+    @Test(expected = FormulaException.class)
+    public void test_resolveResult_given_threeOprandFollowedByOneOperator_then_throwException() {
+        List<Token> tokens = buildTokens("100 0.5 30 +");
+        resultResolver.resolveResult(tokens, context);
     }
 
     /**

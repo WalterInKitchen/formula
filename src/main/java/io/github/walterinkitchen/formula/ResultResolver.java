@@ -58,6 +58,9 @@ public class ResultResolver {
         if (stack.isEmpty()) {
             throw new FormulaException("invalid token stream, no result in stack");
         }
+        if (stack.size() > 1) {
+            throw new FormulaException("grammar error,exist unHandled token");
+        }
         return stack.pop();
     }
 }
