@@ -100,7 +100,7 @@ max,min,avg
 
 
 #### 配置精度
-默认精度是10，即精确到小数点后4位；如果想自定义精度，可以在"resources"目录下创建"io.formula.properties"文件;<br>
+默认精度是4，即精确到小数点后4位；如果想自定义精度，可以在"resources"目录下创建"io.formula.properties"文件;<br>
 并在文件中写入一行来配置精度
 ```properties
 #等号后面提供一个整数的精度，不支持负数
