@@ -12,7 +12,7 @@ BigDecimal res = resolver.resolveResult("a*(b+c)/100", context);
 <dependency>
   <groupId>io.github.walterinkitchen</groupId>
   <artifactId>formula</artifactId>
-  <version>1.0.4</version>
+  <version>1.0.5</version>
 </dependency>
 ```
 为公式解析器提供context，解析器将从context中查找’变量‘的值
