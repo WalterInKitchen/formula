@@ -13,6 +13,7 @@ import org.junit.Test;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -84,6 +85,25 @@ public class RpnConverterTest {
     }
 
     /**
+     * @given tokens
+     * @expected subTokens
+     **/
+    @Test
+    public void test_parseSubTokens_given_tokens_then_returnSubTokens() {
+        Map<String, String> cases = new HashMap<String, String>() {{
+            put("a+b", "a");
+            put("(a+b)", "a+b");
+            put("(a+(b*c))", "a+(b*c)");
+            put("(a*(b/(c-d)))", "a*(b/(c-d))");
+        }};
+        for (Map.Entry<String, String> entry : cases.entrySet()) {
+            Iterator<Token> iterator = createTokens(entry.getKey()).iterator();
+            List<Token> res = converter.parseSubTokens(iterator.next(), iterator);
+            Assert.assertEquals(entry.getValue(), stringifyTokens(res));
+        }
+    }
+
+    /**
      * @given given a couple of groups that the key is tokens and the value is expected
      * @expected the convert result should equal to the expected
      **/
@@ -113,6 +133,8 @@ public class RpnConverterTest {
         res.put("a*(b*(c-d))+e", "abcd-**e+");
         res.put("a+(b*(c-d))+e", "abcd-*+e+");
         res.put("a+(b*(c-d))/e", "abcd-*e/+");
+        res.put("a*(b+c)", "abc+*");
+        res.put("z+a*(b/(c+d))", "zabcd+/*+");
         return res;
     }
 

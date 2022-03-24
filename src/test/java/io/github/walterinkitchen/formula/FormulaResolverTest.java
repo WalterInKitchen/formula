@@ -83,6 +83,7 @@ public class FormulaResolverTest {
                 {"max(a1)", "30"},
                 {"min(a1)", "10"},
                 {"a*(b+c)", "1250"},
+                {"1+2*(3-4)/5+(6-7)", "-0.4"},
         });
     }
 

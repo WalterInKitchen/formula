@@ -6,6 +6,7 @@ import io.github.walterinkitchen.formula.token.Operand;
 import io.github.walterinkitchen.formula.token.Section;
 import io.github.walterinkitchen.formula.token.Token;
 
+import java.util.Collections;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -54,61 +55,67 @@ public class RpnConverter {
 
     private void enqueueSection(Token token) {
         Section section = (Section) token;
-        if (section.isOpen()) {
-            this.operatorQ.addLast(token);
-            this.operandQ.add(token);
+        if (section.isClose()) {
             return;
         }
-        Deque<Token> operands = dumpsAllTillSectionOpen(this.operandQ);
-        Deque<Token> operators = dumpsAllTillSectionOpen(this.operatorQ);
-        this.operandQ.addAll(operands);
-        this.operandQ.addAll(operators);
+        List<Token> subTokens = parseSubTokens(token, iterator);
+        List<Token> res = new RpnConverter().convertToRpn(subTokens);
+        this.operandQ.addAll(res);
     }
 
-    private Deque<Token> dumpsAllTillSectionOpen(Deque<Token> queue) {
-        Deque<Token> res = new LinkedList<>();
-        while (!queue.isEmpty()) {
-            Token next = queue.removeLast();
-            if (!isTokenSectionOpen(next)) {
-                res.addFirst(next);
-                continue;
+    /**
+     * parse the subTokens
+     *
+     * @param first    the first token
+     * @param iterator iterator
+     * @return tokens
+     */
+    protected List<Token> parseSubTokens(Token first, Iterator<Token> iterator) {
+        if (!(first instanceof Section)) {
+            return Collections.singletonList(first);
+        }
+        Section firstSection = (Section) first;
+        if (firstSection.isClose()) {
+            return Collections.singletonList(first);
+        }
+        List<Token> res = new LinkedList<>();
+        int deep = 1;
+        while (iterator.hasNext()) {
+            Token nextToken = iterator.next();
+            if (nextToken instanceof Section) {
+                Section nextSection = (Section) nextToken;
+                if (nextSection.isOpen()) {
+                    deep++;
+                }
+                if (nextSection.isClose() && --deep == 0) {
+                    break;
+                }
             }
-            break;
+            res.add(nextToken);
         }
         return res;
     }
 
-    private boolean isTokenSectionOpen(Token token) {
-        if (!(token instanceof Section)) {
-            return false;
-        }
-        Section section = (Section) token;
-        return section.isOpen();
-    }
-
     private void enqueueOperator(Token token) {
-        Operable operable = (Operable) token;
+        Operable operator = (Operable) token;
         if (operatorQ.isEmpty()) {
             operatorQ.addLast(token);
             return;
         }
         Token lastToken = operatorQ.getLast();
-        if (!(lastToken instanceof Operable)) {
-            operatorQ.addLast(token);
+        Operable lastOperator = (Operable) lastToken;
+        if (isFirstOperatorHasLowerPriority(operator, lastOperator)) {
+            operatorQ.removeLast();
+            operandQ.addLast(lastOperator);
+            operatorQ.addLast(operator);
             return;
         }
-        Operable last = (Operable) lastToken;
-        operatorQ.removeLast();
-        if (isFirstOperatorHasLowerPriority(operable, last)) {
-            operandQ.addLast(lastToken);
-            operatorQ.addLast(token);
-        } else {
-            if (this.iterator.hasNext()) {
-                operandQ.addLast(iterator.next());
-            }
-            operandQ.addLast(token);
-            operatorQ.addLast(lastToken);
-        }
+
+        Token nextToken = iterator.next();
+        List<Token> subTokens = parseSubTokens(nextToken, iterator);
+        List<Token> res = new RpnConverter().convertToRpn(subTokens);
+        this.operandQ.addAll(res);
+        this.operandQ.add(operator);
     }
 
     private boolean isFirstOperatorHasLowerPriority(Operable first, Operable second) {
